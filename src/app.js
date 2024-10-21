@@ -3,8 +3,8 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
-const { handleTwitchAuth } = require('./twitch');
-const { handleGameLogic } = require('./gameLogic');
+const { handleGameLogic, questions, currentQuestionIndex, votes } = require('./gameLogic');
+const { handleTwitchAuth, getTwitchToken, getTwitchUserInfo } = require('./twitch');
 
 const app = express();
 const server = http.createServer(app);
@@ -24,6 +24,20 @@ app.get('/auth/twitch', async (req, res) => {
   res.redirect(twitchAuthUrl);
 });
 
+// Twitch OAuth callback route
+app.get('/auth/twitch/callback', async (req, res) => {
+  const { code } = req.query;
+  try {
+    const token = await getTwitchToken(code);
+    const userInfo = await getTwitchUserInfo(token);
+    // Simpan token dan userInfo di session atau kirim ke client
+    res.redirect('/'); // Redirect ke halaman utama
+  } catch (error) {
+    console.error('Error during Twitch authentication:', error);
+    res.status(500).send('Authentication failed');
+  }
+});
+
 // WebSocket connection for real-time game events
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
@@ -32,6 +46,28 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });
+});
+
+// API route to get current game state
+app.get('/api/game-state', (req, res) => {
+    res.json({
+        currentQuestion: questions[currentQuestionIndex].question,
+        votes: votes
+    });
+});
+
+// API route to get Twitch user info
+app.get('/api/user', async (req, res) => {
+    const token = req.headers.authorization;
+    if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+    try {
+        const userInfo = await getTwitchUserInfo(token);
+        res.json(userInfo);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user info' });
+    }
 });
 
 // Start server

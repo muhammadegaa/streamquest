@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket Test</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <button onclick="startGame()">Start Game</button>
+  <button onclick="playerAction()">Player Action</button>
+  <script>
+    const socket = io();
+    
+    function startGame() {
+      socket.emit('startGame', { gameId: 1 });
+    }
+    
+    function playerAction() {
+      socket.emit('playerAction', { action: 'vote', choice: 'A' });
+    }
+    
+    socket.on('gameStarted', (data) => {
+      console.log('Game started:', data);
+    });
+    
+    socket.on('gameStateUpdated', (data) => {
+      console.log('Game state updated:', data);
+    });
+  </script>
+</body>
+</html>
+

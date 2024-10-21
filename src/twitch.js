@@ -24,4 +24,14 @@ async function getTwitchToken(code) {
   return response.data.access_token;
 }
 
-module.exports = { handleTwitchAuth, getTwitchToken };
+async function getTwitchUserInfo(token) {
+    const response = await axios.get('https://api.twitch.tv/helix/users', {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Client-Id': TWITCH_CLIENT_ID
+        }
+    });
+    return response.data.data[0];
+}
+
+module.exports = { handleTwitchAuth, getTwitchToken, getTwitchUserInfo };

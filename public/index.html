@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Quest</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>Stream Quest</h1>
+    <button id="startGame">Start Game</button>
+    <button id="twitchLogin">Login with Twitch</button>
+    <div id="gameArea" style="display: none;">
+        <h2>Current Question:</h2>
+        <p id="question"></p>
+        <button id="optionA">Option A</button>
+        <button id="optionB">Option B</button>
+    </div>
+    <div id="votes">
+        <p>Votes A: <span id="votesA">0</span></p>
+        <p>Votes B: <span id="votesB">0</span></p>
+    </div>
+    <div id="recentVotes"></div>
+    <script>
+        const socket = io();
+        const startButton = document.getElementById('startGame');
+        const gameArea = document.getElementById('gameArea');
+        const questionElement = document.getElementById('question');
+        const optionA = document.getElementById('optionA');
+        const optionB = document.getElementById('optionB');
+
+        startButton.addEventListener('click', () => {
+            socket.emit('startGame', {});
+        });
+
+        optionA.addEventListener('click', () => {
+            socket.emit('playerAction', { action: 'vote', choice: 'A' });
+        });
+
+        optionB.addEventListener('click', () => {
+            socket.emit('playerAction', { action: 'vote', choice: 'B' });
+        });
+
+        socket.on('gameStarted', (gameState) => {
+            startButton.style.display = 'none';
+            gameArea.style.display = 'block';
+            questionElement.textContent = gameState.question;
+        });
+
+        socket.on('gameStateUpdated', (updatedGameState) => {
+            questionElement.textContent = updatedGameState.question;
+        });
+
+        socket.on('voteUpdated', (data) => {
+            document.getElementById('votesA').textContent = data.votes.A;
+            document.getElementById('votesB').textContent = data.votes.B;
+            const voteElement = document.createElement('p');
+            voteElement.textContent = `${data.username} voted ${data.choice}`;
+            document.getElementById('recentVotes').prepend(voteElement);
+        });
+
+        document.getElementById('twitchLogin').addEventListener('click', () => {
+            window.location.href = '/auth/twitch';
+        });
+    </script>
+</body>
+</html>
