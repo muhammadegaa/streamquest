@@ -7,6 +7,7 @@ const TWITCH_REDIRECT_URI = process.env.TWITCH_REDIRECT_URI;
 
 async function handleTwitchAuth() {
   const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${TWITCH_CLIENT_ID}&redirect_uri=${TWITCH_REDIRECT_URI}&response_type=code&scope=user:read:email`;
+  console.log('Generated Twitch auth URL:', authUrl);
   return authUrl;
 }
 

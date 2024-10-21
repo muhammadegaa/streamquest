@@ -20,7 +20,9 @@ app.get('/', (req, res) => {
 
 // Twitch OAuth route (for logging in)
 app.get('/auth/twitch', async (req, res) => {
+  console.log('Twitch auth route hit');
   const twitchAuthUrl = await handleTwitchAuth();
+  console.log('Redirecting to:', twitchAuthUrl);
   res.redirect(twitchAuthUrl);
 });
 

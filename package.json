@@ -13,12 +13,12 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "socket.io": "^4.8.0",
     "tmi.js": "^1.8.5"
   },
   "devDependencies": {
-    "dotenv": "^16.4.5",
     "jest": "^29.7.0"
   }
 }
