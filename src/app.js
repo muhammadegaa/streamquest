@@ -68,7 +68,8 @@ const io = new Server(server, {
   transports: ['polling', 'websocket'],
   pingTimeout: 60000,
   pingInterval: 25000,
-  allowEIO3: true
+  allowEIO3: true,
+  path: '/socket.io'
 });
 
 io.on('connection', (socket) => {
@@ -81,10 +82,18 @@ io.on('connection', (socket) => {
   socket.on('disconnect', (reason) => {
     console.log('User disconnected:', socket.id, 'Reason:', reason);
   });
+
+  // Tambahkan event listener baru
+  socket.on('connect_error', (error) => {
+    console.error('Connection error:', error);
+  });
 });
 
 io.engine.on('connection_error', (err) => {
-  console.error('Connection error:', err);
+  console.log(err.req);      // the request object
+  console.log(err.code);     // the error code, for example 1
+  console.log(err.message);  // the error message, for example "Session ID unknown"
+  console.log(err.context);  // some additional error context
 });
 
 // API route to get current game state
@@ -124,3 +133,8 @@ app.use('/socket.io', express.static(path.join(__dirname, '../node_modules/socke
 
 // Set up Twitch EventSub
 twitchEventSub.setup(app);
+
+// Tambahkan logging untuk server
+server.on('error', (error) => {
+  console.error('Server error:', error);
+});
