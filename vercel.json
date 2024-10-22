@@ -1,19 +1,14 @@
 {
-    "version": 2,
-    "builds": [
-      { "src": "src/app.js", "use": "@vercel/node" },
-      { "src": "public/**", "use": "@vercel/static" }
-    ],
-    "routes": [
-      { "src": "/socket.io/(.*)", "dest": "src/app.js" },
-      { "src": "/api/(.*)", "dest": "src/app.js" },
-      { "src": "/auth/(.*)", "dest": "src/app.js" },
-      { "handle": "filesystem" },
-      { "src": "/(.*)", "dest": "src/app.js" }
-    ],
-    "env": {
-      "TWITCH_CLIENT_ID": "qperj697k4eieh037puo1e8l8spwwq",
-      "TWITCH_CLIENT_SECRET": "v73ubtvksyfxpyzcou9ux0x48fqgcb",
-      "TWITCH_REDIRECT_URI": "https://streamquest.vercel.app/auth/twitch/callback"
-    }
-  }
+  "version": 2,
+  "builds": [
+    { "src": "src/app.js", "use": "@vercel/node" },
+    { "src": "public/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/socket.io/(.*)", "dest": "src/app.js" },
+    { "src": "/api/(.*)", "dest": "src/app.js" },
+    { "src": "/auth/(.*)", "dest": "src/app.js" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "src/app.js" }
+  ]
+}

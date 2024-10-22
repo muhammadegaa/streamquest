@@ -64,7 +64,9 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST"]
   },
-  transports: ['polling']
+  transports: ['polling'],
+  pingTimeout: 60000,
+  pingInterval: 25000
 });
 
 io.on('connection', (socket) => {
@@ -111,3 +113,5 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+app.use('/socket.io', express.static(path.join(__dirname, '../node_modules/socket.io/client-dist')));

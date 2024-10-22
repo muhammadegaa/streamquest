@@ -24,8 +24,18 @@
     <script>
         const socket = io('https://streamquest.vercel.app', {
             transports: ['polling'],
-            forceNew: true
+            forceNew: true,
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            randomizationFactor: 0.5,
+            timeout: 20000,
+            autoConnect: false
         });
+
+        socket.connect();
+
         const startButton = document.getElementById('startGame');
         const gameArea = document.getElementById('gameArea');
         const questionElement = document.getElementById('question');
@@ -40,6 +50,9 @@
 
         socket.on('connect_error', (error) => {
             console.error('Connection error:', error);
+            setTimeout(() => {
+                socket.connect();
+            }, 1000);
         });
 
         socket.on('connect_timeout', (timeout) => {
@@ -48,6 +61,21 @@
 
         socket.on('error', (error) => {
             console.error('Socket error:', error);
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log('Disconnected:', reason);
+            if (reason === 'io server disconnect') {
+                socket.connect();
+            }
+        });
+
+        socket.on('reconnect', (attemptNumber) => {
+            console.log('Reconnected after', attemptNumber, 'attempts');
+        });
+
+        socket.on('reconnect_attempt', (attemptNumber) => {
+            console.log('Attempting reconnection:', attemptNumber);
         });
 
         startButton.addEventListener('click', () => {
