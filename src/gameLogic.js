@@ -14,7 +14,10 @@ const { setupTwitchChat } = require('./twitchChat');
 function handleGameLogic(socket, io) {
     let twitchClient;
 
+    console.log('Game logic initialized for socket:', socket.id);
+
     socket.on('startGame', (data) => {
+        console.log('Start game event received:', data);
         currentQuestionIndex = 0;
         votes = { A: 0, B: 0 };
         io.emit('gameStarted', { question: questions[currentQuestionIndex].question });
@@ -30,6 +33,7 @@ function handleGameLogic(socket, io) {
     });
 
     function handleVote(choice, username) {
+        console.log('Vote received:', choice, 'from', username);
         votes[choice.toUpperCase()]++;
         io.emit('voteUpdated', { votes, username, choice });
 
@@ -45,6 +49,7 @@ function handleGameLogic(socket, io) {
     }
 
     socket.on('playerAction', (action) => {
+        console.log('Player action received:', action);
         if (action.action === 'vote') {
             handleVote(action.choice, action.username);
         }

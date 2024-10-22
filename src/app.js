@@ -10,11 +10,14 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+console.log('Server starting...');
+
 // Serve static files from 'public'
 app.use(express.static('public'));
 
 // Basic route
 app.get('/', (req, res) => {
+  console.log('Serving index.html');
   res.sendFile(__dirname + '/public/index.html');
 });
 
@@ -37,7 +40,7 @@ app.get('/auth/twitch/callback', async (req, res) => {
     const token = await getTwitchToken(code);
     const userInfo = await getTwitchUserInfo(token);
     console.log('User authenticated:', userInfo);
-    res.redirect('/'); // Redirect to the main page
+    res.redirect('/');
   } catch (error) {
     console.error('Error during Twitch authentication:', error);
     res.status(500).send('Authentication failed');
@@ -81,7 +84,7 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'Server is running' });
 });
 
-// Start server
+// Start the server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
