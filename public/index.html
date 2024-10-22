@@ -23,7 +23,8 @@
     <div id="recentVotes"></div>
     <script>
         const socket = io('https://streamquest.vercel.app', {
-            transports: ['websocket', 'polling']
+            transports: ['polling'],
+            forceNew: true
         });
         const startButton = document.getElementById('startGame');
         const gameArea = document.getElementById('gameArea');
