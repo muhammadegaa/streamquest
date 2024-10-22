@@ -22,7 +22,9 @@
     </div>
     <div id="recentVotes"></div>
     <script>
-        const socket = io();
+        const socket = io('https://streamquest.vercel.app', {
+            transports: ['websocket', 'polling']
+        });
         const startButton = document.getElementById('startGame');
         const gameArea = document.getElementById('gameArea');
         const questionElement = document.getElementById('question');
@@ -36,7 +38,15 @@
         });
 
         socket.on('connect_error', (error) => {
-            console.error('Socket connection error:', error);
+            console.error('Connection error:', error);
+        });
+
+        socket.on('connect_timeout', (timeout) => {
+            console.error('Connection timeout:', timeout);
+        });
+
+        socket.on('error', (error) => {
+            console.error('Socket error:', error);
         });
 
         startButton.addEventListener('click', () => {

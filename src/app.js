@@ -6,10 +6,10 @@ require('dotenv').config();
 const { handleGameLogic, questions, currentQuestionIndex, votes } = require('./gameLogic');
 const { handleTwitchAuth, getTwitchToken, getTwitchUserInfo } = require('./twitch');
 const path = require('path');
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
 console.log('Server starting...');
 
@@ -59,12 +59,22 @@ app.get('/auth/twitch/callback', async (req, res) => {
 });
 
 // WebSocket connection for real-time game events
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
-  handleGameLogic(socket, io);
+  
+  socket.on('error', (error) => {
+    console.error('Socket error:', error);
+  });
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+  socket.on('disconnect', (reason) => {
+    console.log('User disconnected:', socket.id, 'Reason:', reason);
   });
 });
 
