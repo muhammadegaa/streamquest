@@ -7,6 +7,7 @@ const { handleGameLogic, questions, currentQuestionIndex, votes } = require('./g
 const { handleTwitchAuth, getTwitchToken, getTwitchUserInfo } = require('./twitch');
 const path = require('path');
 const cors = require('cors');
+const twitchEventSub = require('./twitchEventSub');
 
 const app = express();
 const server = http.createServer(app);
@@ -64,7 +65,7 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST"]
   },
-  transports: ['polling'],
+  transports: ['websocket', 'polling'],
   pingTimeout: 60000,
   pingInterval: 25000
 });
@@ -115,3 +116,6 @@ server.listen(PORT, () => {
 });
 
 app.use('/socket.io', express.static(path.join(__dirname, '../node_modules/socket.io/client-dist')));
+
+// Set up Twitch EventSub
+twitchEventSub.setup(app);
