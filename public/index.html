@@ -23,6 +23,7 @@
     <div id="recentVotes"></div>
     <script>
         const socket = io();
+        console.log('Socket initialized:', socket.connected);
         const startButton = document.getElementById('startGame');
         const gameArea = document.getElementById('gameArea');
         const questionElement = document.getElementById('question');
@@ -30,6 +31,7 @@
         const optionB = document.getElementById('optionB');
 
         startButton.addEventListener('click', () => {
+            console.log('Start Game button clicked');
             socket.emit('startGame', {});
         });
 

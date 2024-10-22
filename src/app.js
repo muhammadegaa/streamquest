@@ -20,9 +20,7 @@ app.get('/', (req, res) => {
 
 // Twitch OAuth route (for logging in)
 app.get('/auth/twitch', async (req, res) => {
-  console.log('Twitch auth route hit');
   const twitchAuthUrl = await handleTwitchAuth();
-  console.log('Redirecting to:', twitchAuthUrl);
   res.redirect(twitchAuthUrl);
 });
 
@@ -70,6 +68,11 @@ app.get('/api/user', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch user info' });
     }
+});
+
+// API route to test server
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Server is running' });
 });
 
 // Start server
