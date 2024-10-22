@@ -79,6 +79,14 @@
             console.log('Twitch login button clicked');
             window.location.href = '/auth/twitch';
         });
+
+        // Check if login was successful
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('login') === 'success') {
+            console.log('Login successful');
+            document.getElementById('twitchLogin').style.display = 'none';
+            // You might want to show a logged-in user interface here
+        }
     </script>
 </body>
 </html>

@@ -21,6 +21,11 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
+// Add this catch-all route
+app.get('*', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
+
 // Twitch OAuth route (for logging in)
 app.get('/auth/twitch', async (req, res) => {
   try {
@@ -36,11 +41,16 @@ app.get('/auth/twitch', async (req, res) => {
 // Twitch OAuth callback route
 app.get('/auth/twitch/callback', async (req, res) => {
   const { code } = req.query;
+  if (!code) {
+    console.error('No code provided in callback');
+    return res.status(400).send('No code provided');
+  }
   try {
     const token = await getTwitchToken(code);
     const userInfo = await getTwitchUserInfo(token);
     console.log('User authenticated:', userInfo);
-    res.redirect('/');
+    // Here you might want to store the token and user info in a session or send it to the client
+    res.redirect('/?login=success');
   } catch (error) {
     console.error('Error during Twitch authentication:', error);
     res.status(500).send('Authentication failed');
