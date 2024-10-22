@@ -23,14 +23,15 @@
     <div id="recentVotes"></div>
     <script>
         const socket = io('https://streamquest.vercel.app', {
-            transports: ['websocket', 'polling'],
+            transports: ['polling', 'websocket'],
             forceNew: true,
             reconnection: true,
             reconnectionAttempts: Infinity,
             reconnectionDelay: 1000,
             reconnectionDelayMax: 5000,
             randomizationFactor: 0.5,
-            timeout: 20000
+            timeout: 20000,
+            autoConnect: false
         });
 
         socket.connect();
@@ -49,6 +50,11 @@
 
         socket.on('connect_error', (error) => {
             console.error('Connection error:', error);
+            if (socket.io.engine.transport.name !== 'polling') {
+                console.log('Falling back to polling transport');
+                socket.io.engine.transport.name = 'polling';
+                socket.connect();
+            }
         });
 
         socket.on('connect_timeout', (timeout) => {

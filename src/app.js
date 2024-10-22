@@ -65,9 +65,10 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST"]
   },
-  transports: ['websocket', 'polling'],
+  transports: ['polling', 'websocket'],
   pingTimeout: 60000,
-  pingInterval: 25000
+  pingInterval: 25000,
+  allowEIO3: true
 });
 
 io.on('connection', (socket) => {
@@ -80,6 +81,10 @@ io.on('connection', (socket) => {
   socket.on('disconnect', (reason) => {
     console.log('User disconnected:', socket.id, 'Reason:', reason);
   });
+});
+
+io.engine.on('connection_error', (err) => {
+  console.error('Connection error:', err);
 });
 
 // API route to get current game state
