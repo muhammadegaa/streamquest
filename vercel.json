@@ -6,6 +6,9 @@
     ],
     "routes": [
       { "src": "/socket.io/(.*)", "dest": "src/app.js" },
+      { "src": "/api/(.*)", "dest": "src/app.js" },
+      { "src": "/auth/(.*)", "dest": "src/app.js" },
+      { "handle": "filesystem" },
       { "src": "/(.*)", "dest": "src/app.js" }
     ],
     "env": {

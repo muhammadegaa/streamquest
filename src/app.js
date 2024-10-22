@@ -5,6 +5,7 @@ const { Server } = require('socket.io');
 require('dotenv').config();
 const { handleGameLogic, questions, currentQuestionIndex, votes } = require('./gameLogic');
 const { handleTwitchAuth, getTwitchToken, getTwitchUserInfo } = require('./twitch');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -18,12 +19,12 @@ app.use(express.static('public'));
 // Basic route
 app.get('/', (req, res) => {
   console.log('Serving index.html');
-  res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Add this catch-all route
+// Catch-all route
 app.get('*', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // Twitch OAuth route (for logging in)
