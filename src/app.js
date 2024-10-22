@@ -20,8 +20,14 @@ app.get('/', (req, res) => {
 
 // Twitch OAuth route (for logging in)
 app.get('/auth/twitch', async (req, res) => {
-  const twitchAuthUrl = await handleTwitchAuth();
-  res.redirect(twitchAuthUrl);
+  try {
+    const twitchAuthUrl = await handleTwitchAuth();
+    console.log('Redirecting to Twitch auth URL:', twitchAuthUrl);
+    res.redirect(twitchAuthUrl);
+  } catch (error) {
+    console.error('Error in /auth/twitch route:', error);
+    res.status(500).send('Error initiating Twitch authentication');
+  }
 });
 
 // Twitch OAuth callback route
@@ -30,8 +36,8 @@ app.get('/auth/twitch/callback', async (req, res) => {
   try {
     const token = await getTwitchToken(code);
     const userInfo = await getTwitchUserInfo(token);
-    // Simpan token dan userInfo di session atau kirim ke client
-    res.redirect('/'); // Redirect ke halaman utama
+    console.log('User authenticated:', userInfo);
+    res.redirect('/'); // Redirect to the main page
   } catch (error) {
     console.error('Error during Twitch authentication:', error);
     res.status(500).send('Authentication failed');
@@ -41,7 +47,7 @@ app.get('/auth/twitch/callback', async (req, res) => {
 // WebSocket connection for real-time game events
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
-  handleGameLogic(socket, io); // Handle game interactions
+  handleGameLogic(socket, io);
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);

@@ -23,37 +23,43 @@
     <div id="recentVotes"></div>
     <script>
         const socket = io();
-        console.log('Socket initialized:', socket.connected);
         const startButton = document.getElementById('startGame');
         const gameArea = document.getElementById('gameArea');
         const questionElement = document.getElementById('question');
         const optionA = document.getElementById('optionA');
         const optionB = document.getElementById('optionB');
 
-        startButton.addEventListener('click', () => {
-            console.log('Start Game button clicked');
-            socket.emit('startGame', {});
-        });
+        socket.on('connect', () => {
+            console.log('Socket connected:', socket.id);
+            
+            startButton.addEventListener('click', () => {
+                console.log('Start Game button clicked');
+                socket.emit('startGame', {});
+            });
 
-        optionA.addEventListener('click', () => {
-            socket.emit('playerAction', { action: 'vote', choice: 'A' });
-        });
+            optionA.addEventListener('click', () => {
+                socket.emit('playerAction', { action: 'vote', choice: 'A' });
+            });
 
-        optionB.addEventListener('click', () => {
-            socket.emit('playerAction', { action: 'vote', choice: 'B' });
+            optionB.addEventListener('click', () => {
+                socket.emit('playerAction', { action: 'vote', choice: 'B' });
+            });
         });
 
         socket.on('gameStarted', (gameState) => {
+            console.log('Game started:', gameState);
             startButton.style.display = 'none';
             gameArea.style.display = 'block';
             questionElement.textContent = gameState.question;
         });
 
         socket.on('gameStateUpdated', (updatedGameState) => {
+            console.log('Game state updated:', updatedGameState);
             questionElement.textContent = updatedGameState.question;
         });
 
         socket.on('voteUpdated', (data) => {
+            console.log('Vote updated:', data);
             document.getElementById('votesA').textContent = data.votes.A;
             document.getElementById('votesB').textContent = data.votes.B;
             const voteElement = document.createElement('p');
