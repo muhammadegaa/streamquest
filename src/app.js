@@ -85,7 +85,7 @@ app.get('/api/events', (req, res) => {
     'Connection': 'keep-alive'
   });
 
-  res.write('\n');
+  res.flushHeaders();
 
   const sendEvent = (event, data) => {
     res.write(`event: ${event}\n`);
@@ -93,10 +93,6 @@ app.get('/api/events', (req, res) => {
   };
 
   handleGameLogic.addEventListeners(sendEvent);
-
-  req.on('close', () => {
-    handleGameLogic.removeEventListeners(sendEvent);
-  });
 
   // Send an initial event to keep the connection alive
   sendEvent('ping', {});
@@ -106,6 +102,7 @@ app.get('/api/events', (req, res) => {
 
   req.on('close', () => {
     clearInterval(keepAlive);
+    handleGameLogic.removeEventListeners(sendEvent);
   });
 });
 

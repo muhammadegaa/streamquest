@@ -63,6 +63,10 @@
 
         const eventSource = new EventSource('/api/events');
 
+        eventSource.onopen = (event) => {
+            console.log('EventSource connection opened:', event);
+        };
+
         eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
             console.log('Received event:', event.type, data);
