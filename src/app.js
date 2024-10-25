@@ -112,10 +112,11 @@ io.on('connection', (socket) => {
 });
 
 io.engine.on('connection_error', (err) => {
-  console.log(err.req);      // the request object
-  console.log(err.code);     // the error code, for example 1
-  console.log(err.message);  // the error message, for example "Session ID unknown"
-  console.log(err.context);  // some additional error context
+  console.log('Connection error details:');
+  console.log('Request:', err.req);
+  console.log('Code:', err.code);
+  console.log('Message:', err.message);
+  console.log('Context:', err.context);
 });
 
 // API route to get current game state

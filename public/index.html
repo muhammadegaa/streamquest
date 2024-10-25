@@ -23,10 +23,11 @@
     <div id="recentVotes"></div>
     <script>
         const socket = io({
-            transports: ['websocket', 'polling'],
+            transports: ['polling', 'websocket'],
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
             timeout: 20000,
+            forceNew: true
         });
 
         socket.on('connect_error', (error) => {
