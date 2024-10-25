@@ -17,6 +17,11 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(cors());
 
+app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self'");
+  next();
+});
+
 app.get('/', (req, res) => {
   console.log('Serving index.html');
   res.sendFile(path.join(__dirname, '../public/index.html'));
@@ -80,6 +85,8 @@ app.get('/api/events', (req, res) => {
     'Connection': 'keep-alive'
   });
 
+  res.write('\n');
+
   const sendEvent = (event, data) => {
     res.write(`event: ${event}\n`);
     res.write(`data: ${JSON.stringify(data)}\n\n`);
@@ -89,6 +96,16 @@ app.get('/api/events', (req, res) => {
 
   req.on('close', () => {
     handleGameLogic.removeEventListeners(sendEvent);
+  });
+
+  // Send an initial event to keep the connection alive
+  sendEvent('ping', {});
+  const keepAlive = setInterval(() => {
+    sendEvent('ping', {});
+  }, 15000);
+
+  req.on('close', () => {
+    clearInterval(keepAlive);
   });
 });
 
