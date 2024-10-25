@@ -8,52 +8,49 @@ const questions = [
 
 let currentQuestionIndex = 0;
 let votes = { A: 0, B: 0 };
+let eventListeners = [];
 
-const { setupTwitchChat } = require('./twitchChat');
-
-function handleGameLogic(socket, io) {
-    let twitchClient;
-
-    console.log('Game logic initialized for socket:', socket.id);
-
-    socket.on('startGame', (data) => {
-        console.log('Start game event received:', data);
-        currentQuestionIndex = 0;
-        votes = { A: 0, B: 0 };
-        io.emit('gameStarted', { question: questions[currentQuestionIndex].question });
-
-        // Setup Twitch chat
-        if (data.twitchChannel) {
-            twitchClient = setupTwitchChat(data.twitchChannel, (username, message) => {
-                if (message.toLowerCase() === 'a' || message.toLowerCase() === 'b') {
-                    handleVote(message.toLowerCase(), username);
-                }
-            });
-        }
-    });
-
-    function handleVote(choice, username) {
-        console.log('Vote received:', choice, 'from', username);
-        votes[choice.toUpperCase()]++;
-        io.emit('voteUpdated', { votes, username, choice });
-
-        if (votes.A + votes.B >= 5) {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) {
-                votes = { A: 0, B: 0 };
-                io.emit('gameStateUpdated', { question: questions[currentQuestionIndex].question });
-            } else {
-                io.emit('gameEnded', { message: "Quest completed!" });
-            }
-        }
-    }
-
-    socket.on('playerAction', (action) => {
-        console.log('Player action received:', action);
-        if (action.action === 'vote') {
-            handleVote(action.choice, action.username);
-        }
-    });
+function startGame() {
+  currentQuestionIndex = 0;
+  votes = { A: 0, B: 0 };
+  notifyListeners('gameStarted', { question: questions[currentQuestionIndex].question });
 }
 
-module.exports = { handleGameLogic, questions, currentQuestionIndex, votes };
+function handlePlayerAction(action, choice, username) {
+  if (action === 'vote') {
+    votes[choice.toUpperCase()]++;
+    notifyListeners('voteUpdated', { votes, username, choice });
+
+    if (votes.A + votes.B >= 5) {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        votes = { A: 0, B: 0 };
+        notifyListeners('gameStateUpdated', { question: questions[currentQuestionIndex].question });
+      } else {
+        notifyListeners('gameEnded', { message: "Quest completed!" });
+      }
+    }
+  }
+}
+
+function notifyListeners(event, data) {
+  eventListeners.forEach(listener => listener(event, data));
+}
+
+function addEventListeners(listener) {
+  eventListeners.push(listener);
+}
+
+function removeEventListeners(listener) {
+  eventListeners = eventListeners.filter(l => l !== listener);
+}
+
+module.exports = {
+  questions,
+  currentQuestionIndex,
+  votes,
+  startGame,
+  handlePlayerAction,
+  addEventListeners,
+  removeEventListeners
+};

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Quest</title>
-    <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
     <h1>Stream Quest</h1>
@@ -22,91 +21,69 @@
     </div>
     <div id="recentVotes"></div>
     <script>
-        const socket = io({
-            transports: ['polling', 'websocket'],
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
-            timeout: 20000,
-            forceNew: true
-        });
-
-        socket.on('connect_error', (error) => {
-            console.error('Connection error:', error);
-            // Add error handling logic here
-        });
-
-        socket.on('connect_timeout', (timeout) => {
-            console.error('Connection timeout:', timeout);
-            // Add timeout handling logic here
-        });
-
-        socket.on('reconnect_attempt', (attemptNumber) => {
-            console.log('Attempting reconnection:', attemptNumber);
-        });
-
-        socket.on('reconnect_error', (error) => {
-            console.error('Reconnection error:', error);
-        });
-
-        socket.on('reconnect_failed', () => {
-            console.error('Failed to reconnect');
-        });
-
-        socket.on('connect', () => {
-            console.log('Socket connected:', socket.id);
-        });
-
-        socket.on('error', (error) => {
-            console.error('Socket error:', error);
-        });
-
-        socket.on('disconnect', (reason) => {
-            console.log('Disconnected:', reason);
-            if (reason === 'io server disconnect') {
-                socket.connect();
-            }
-        });
+        const startButton = document.getElementById('startGame');
+        const gameArea = document.getElementById('gameArea');
+        const questionElement = document.getElementById('question');
+        const optionA = document.getElementById('optionA');
+        const optionB = document.getElementById('optionB');
 
         startButton.addEventListener('click', () => {
             console.log('Start Game button clicked');
-            socket.emit('startGame', {}, (error) => {
-                if (error) {
-                    console.error('Error starting game:', error);
-                }
-            });
+            fetch('/api/start-game', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.error('Error starting game:', error));
         });
 
         optionA.addEventListener('click', () => {
             console.log('Option A clicked');
-            socket.emit('playerAction', { action: 'vote', choice: 'A' }, (error) => {
-                if (error) {
-                    console.error('Error voting for A:', error);
-                }
-            });
+            sendPlayerAction('vote', 'A');
         });
 
         optionB.addEventListener('click', () => {
             console.log('Option B clicked');
-            socket.emit('playerAction', { action: 'vote', choice: 'B' }, (error) => {
-                if (error) {
-                    console.error('Error voting for B:', error);
-                }
-            });
+            sendPlayerAction('vote', 'B');
         });
 
-        socket.on('gameStarted', (gameState) => {
-            console.log('Game started:', gameState);
+        function sendPlayerAction(action, choice) {
+            fetch('/api/player-action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, choice, username: 'Player' })
+            })
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.error('Error sending player action:', error));
+        }
+
+        document.getElementById('twitchLogin').addEventListener('click', () => {
+            console.log('Twitch login button clicked');
+            window.location.href = '/auth/twitch';
+        });
+
+        const eventSource = new EventSource('/api/events');
+
+        eventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('Received event:', event.type, data);
+        };
+
+        eventSource.addEventListener('gameStarted', (event) => {
+            const data = JSON.parse(event.data);
+            console.log('Game started:', data);
             startButton.style.display = 'none';
             gameArea.style.display = 'block';
-            questionElement.textContent = gameState.question;
+            questionElement.textContent = data.question;
         });
 
-        socket.on('gameStateUpdated', (updatedGameState) => {
-            console.log('Game state updated:', updatedGameState);
-            questionElement.textContent = updatedGameState.question;
+        eventSource.addEventListener('gameStateUpdated', (event) => {
+            const data = JSON.parse(event.data);
+            console.log('Game state updated:', data);
+            questionElement.textContent = data.question;
         });
 
-        socket.on('voteUpdated', (data) => {
+        eventSource.addEventListener('voteUpdated', (event) => {
+            const data = JSON.parse(event.data);
             console.log('Vote updated:', data);
             document.getElementById('votesA').textContent = data.votes.A;
             document.getElementById('votesB').textContent = data.votes.B;
@@ -115,18 +92,10 @@
             document.getElementById('recentVotes').prepend(voteElement);
         });
 
-        document.getElementById('twitchLogin').addEventListener('click', () => {
-            console.log('Twitch login button clicked');
-            window.location.href = '/auth/twitch';
-        });
-
-        // Check if login was successful
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('login') === 'success') {
-            console.log('Login successful');
-            document.getElementById('twitchLogin').style.display = 'none';
-            // You might want to show a logged-in user interface here
-        }
+        eventSource.onerror = (error) => {
+            console.error('EventSource failed:', error);
+            eventSource.close();
+        };
     </script>
 </body>
 </html>
