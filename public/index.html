@@ -37,11 +37,12 @@
 
         socket.on('connect_error', (error) => {
             console.error('Connection error:', error);
-            if (socket.io.engine.transport.name !== 'polling') {
-                console.log('Falling back to polling transport');
-                socket.io.engine.transport.name = 'polling';
-                socket.connect();
-            }
+            // Tambahkan logika penanganan kesalahan di sini
+        });
+
+        socket.on('connect_timeout', (timeout) => {
+            console.error('Connection timeout:', timeout);
+            // Tambahkan logika penanganan timeout di sini
         });
 
         socket.connect();
@@ -56,10 +57,6 @@
 
         socket.on('connect', () => {
             console.log('Socket connected:', socket.id);
-        });
-
-        socket.on('connect_timeout', (timeout) => {
-            console.error('Connection timeout:', timeout);
         });
 
         socket.on('error', (error) => {
@@ -83,17 +80,29 @@
 
         startButton.addEventListener('click', () => {
             console.log('Start Game button clicked');
-            socket.emit('startGame', {});
+            socket.emit('startGame', {}, (error) => {
+                if (error) {
+                    console.error('Error starting game:', error);
+                }
+            });
         });
 
         optionA.addEventListener('click', () => {
             console.log('Option A clicked');
-            socket.emit('playerAction', { action: 'vote', choice: 'A' });
+            socket.emit('playerAction', { action: 'vote', choice: 'A' }, (error) => {
+                if (error) {
+                    console.error('Error voting for A:', error);
+                }
+            });
         });
 
         optionB.addEventListener('click', () => {
             console.log('Option B clicked');
-            socket.emit('playerAction', { action: 'vote', choice: 'B' });
+            socket.emit('playerAction', { action: 'vote', choice: 'B' }, (error) => {
+                if (error) {
+                    console.error('Error voting for B:', error);
+                }
+            });
         });
 
         socket.on('gameStarted', (gameState) => {
