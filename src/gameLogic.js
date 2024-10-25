@@ -45,12 +45,19 @@ function removeEventListeners(listener) {
   eventListeners = eventListeners.filter(l => l !== listener);
 }
 
+function getCurrentQuestion() {
+  return questions[currentQuestionIndex].question;
+}
+
+function getVotes() {
+  return votes;
+}
+
 module.exports = {
-  questions,
-  currentQuestionIndex,
-  votes,
   startGame,
   handlePlayerAction,
   addEventListeners,
-  removeEventListeners
+  removeEventListeners,
+  getCurrentQuestion,
+  getVotes
 };

@@ -28,28 +28,21 @@
         const optionB = document.getElementById('optionB');
 
         startButton.addEventListener('click', () => {
-            console.log('Start Game button clicked');
             fetch('/api/start-game', { method: 'POST' })
                 .then(response => response.json())
                 .then(data => console.log(data))
                 .catch(error => console.error('Error starting game:', error));
         });
 
-        optionA.addEventListener('click', () => {
-            console.log('Option A clicked');
-            sendPlayerAction('vote', 'A');
-        });
-
-        optionB.addEventListener('click', () => {
-            console.log('Option B clicked');
-            sendPlayerAction('vote', 'B');
-        });
+        optionA.addEventListener('click', () => sendPlayerAction('vote', 'A'));
+        optionB.addEventListener('click', () => sendPlayerAction('vote', 'B'));
 
         function sendPlayerAction(action, choice) {
+            const username = new URLSearchParams(window.location.search).get('username') || 'Player';
             fetch('/api/player-action', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, choice, username: 'Player' })
+                body: JSON.stringify({ action, choice, username })
             })
                 .then(response => response.json())
                 .then(data => console.log(data))
@@ -57,7 +50,6 @@
         }
 
         document.getElementById('twitchLogin').addEventListener('click', () => {
-            console.log('Twitch login button clicked');
             window.location.href = '/auth/twitch';
         });
 
@@ -67,14 +59,12 @@
             console.log('EventSource connection opened:', event);
         };
 
-        eventSource.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log('Received event:', event.type, data);
+        eventSource.onerror = (error) => {
+            console.error('EventSource error:', error);
         };
 
         eventSource.addEventListener('gameStarted', (event) => {
             const data = JSON.parse(event.data);
-            console.log('Game started:', data);
             startButton.style.display = 'none';
             gameArea.style.display = 'block';
             questionElement.textContent = data.question;
@@ -82,24 +72,17 @@
 
         eventSource.addEventListener('gameStateUpdated', (event) => {
             const data = JSON.parse(event.data);
-            console.log('Game state updated:', data);
             questionElement.textContent = data.question;
         });
 
         eventSource.addEventListener('voteUpdated', (event) => {
             const data = JSON.parse(event.data);
-            console.log('Vote updated:', data);
             document.getElementById('votesA').textContent = data.votes.A;
             document.getElementById('votesB').textContent = data.votes.B;
             const voteElement = document.createElement('p');
             voteElement.textContent = `${data.username} voted ${data.choice}`;
             document.getElementById('recentVotes').prepend(voteElement);
         });
-
-        eventSource.onerror = (error) => {
-            console.error('EventSource failed:', error);
-            eventSource.close();
-        };
     </script>
 </body>
 </html>

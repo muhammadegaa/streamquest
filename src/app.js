@@ -2,39 +2,30 @@
 const express = require('express');
 const http = require('http');
 require('dotenv').config();
-const { handleGameLogic, questions, currentQuestionIndex, votes } = require('./gameLogic');
+const gameLogic = require('./gameLogic');
 const { handleTwitchAuth, getTwitchToken, getTwitchUserInfo } = require('./twitch');
 const path = require('path');
 const cors = require('cors');
-const twitchEventSub = require('./twitchEventSub');
 
 const app = express();
-const httpServer = http.createServer(app);
-
-console.log('Server starting...');
+const server = http.createServer(app);
 
 app.use(express.static('public'));
 app.use(express.json());
 app.use(cors());
 
 app.use((req, res, next) => {
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self'");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'");
   next();
 });
 
 app.get('/', (req, res) => {
-  console.log('Serving index.html');
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
-
-app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 app.get('/auth/twitch', async (req, res) => {
   try {
     const twitchAuthUrl = await handleTwitchAuth();
-    console.log('Redirecting to Twitch auth URL:', twitchAuthUrl);
     res.redirect(twitchAuthUrl);
   } catch (error) {
     console.error('Error in /auth/twitch route:', error);
@@ -45,36 +36,33 @@ app.get('/auth/twitch', async (req, res) => {
 app.get('/auth/twitch/callback', async (req, res) => {
   const { code } = req.query;
   if (!code) {
-    console.error('No code provided in callback');
     return res.status(400).send('No code provided');
   }
   try {
     const token = await getTwitchToken(code);
     const userInfo = await getTwitchUserInfo(token);
-    console.log('User authenticated:', userInfo);
-    res.redirect('/?login=success');
+    res.redirect(`/?login=success&username=${userInfo.login}`);
   } catch (error) {
     console.error('Error during Twitch authentication:', error);
-    console.error('Error details:', error.response ? error.response.data : 'No response data');
     res.status(500).send('Authentication failed');
   }
 });
 
 app.get('/api/game-state', (req, res) => {
   res.json({
-    currentQuestion: questions[currentQuestionIndex].question,
-    votes: votes
+    currentQuestion: gameLogic.getCurrentQuestion(),
+    votes: gameLogic.getVotes()
   });
 });
 
 app.post('/api/start-game', (req, res) => {
-  handleGameLogic.startGame();
+  gameLogic.startGame();
   res.json({ message: 'Game started' });
 });
 
 app.post('/api/player-action', (req, res) => {
   const { action, choice, username } = req.body;
-  handleGameLogic.handlePlayerAction(action, choice, username);
+  gameLogic.handlePlayerAction(action, choice, username);
   res.json({ message: 'Action received' });
 });
 
@@ -85,51 +73,23 @@ app.get('/api/events', (req, res) => {
     'Connection': 'keep-alive'
   });
 
-  res.flushHeaders();
-
   const sendEvent = (event, data) => {
     res.write(`event: ${event}\n`);
     res.write(`data: ${JSON.stringify(data)}\n\n`);
   };
 
-  handleGameLogic.addEventListeners(sendEvent);
+  gameLogic.addEventListeners(sendEvent);
 
-  // Send an initial event to keep the connection alive
-  sendEvent('ping', {});
+  sendEvent('ping', { message: 'Connected to server' });
+  
   const keepAlive = setInterval(() => {
-    sendEvent('ping', {});
+    sendEvent('ping', { message: 'Keeping connection alive' });
   }, 15000);
 
   req.on('close', () => {
     clearInterval(keepAlive);
-    handleGameLogic.removeEventListeners(sendEvent);
+    gameLogic.removeEventListeners(sendEvent);
   });
 });
 
-app.get('/api/user', async (req, res) => {
-  const token = req.headers.authorization;
-  if (!token) {
-    return res.status(401).json({ error: 'No token provided' });
-  }
-  try {
-    const userInfo = await getTwitchUserInfo(token);
-    res.json(userInfo);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch user info' });
-  }
-});
-
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Server is running' });
-});
-
-const PORT = process.env.PORT || 3000;
-httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
-twitchEventSub.setup(app);
-
-httpServer.on('error', (error) => {
-  console.error('Server error:', error);
-});
+module.exports = app;
