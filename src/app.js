@@ -92,4 +92,10 @@ app.get('/api/events', (req, res) => {
   });
 });
 
+try {
+  // Existing code here
+} catch (error) {
+  console.error('Unexpected error in app.js:', error);
+}
+
 module.exports = app;
