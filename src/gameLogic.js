@@ -21,7 +21,6 @@ function handlePlayerAction(action, choice, username) {
   if (action === 'vote') {
     votes[choice.toUpperCase()]++;
     notifyListeners('voteUpdated', { votes, username, choice });
-    io.emit('gameStarted', { question: questions[currentQuestionIndex].question });
     if (votes.A + votes.B >= 5) {
       currentQuestionIndex++;
       if (currentQuestionIndex < questions.length) {
