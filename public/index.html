@@ -4,6 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Quest</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #6441A4;
+            text-align: center;
+        }
+        button {
+            background-color: #6441A4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #gameArea {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        #votes {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        #recentVotes {
+            margin-top: 20px;
+            height: 100px;
+            overflow-y: auto;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
     <h1>Stream Quest</h1>
@@ -26,11 +67,17 @@
         const questionElement = document.getElementById('question');
         const optionA = document.getElementById('optionA');
         const optionB = document.getElementById('optionB');
+        const votesA = document.getElementById('votesA');
+        const votesB = document.getElementById('votesB');
+        const recentVotes = document.getElementById('recentVotes');
 
         startButton.addEventListener('click', () => {
             fetch('/api/start-game', { method: 'POST' })
                 .then(response => response.json())
-                .then(data => console.log(data))
+                .then(data => {
+                    console.log(data);
+                    updateGameState();
+                })
                 .catch(error => console.error('Error starting game:', error));
         });
 
@@ -65,24 +112,36 @@
 
         eventSource.addEventListener('gameStarted', (event) => {
             const data = JSON.parse(event.data);
-            startButton.style.display = 'none';
-            gameArea.style.display = 'block';
-            questionElement.textContent = data.question;
+            updateGameState();
         });
 
         eventSource.addEventListener('gameStateUpdated', (event) => {
             const data = JSON.parse(event.data);
-            questionElement.textContent = data.question;
+            updateGameState();
         });
 
         eventSource.addEventListener('voteUpdated', (event) => {
             const data = JSON.parse(event.data);
-            document.getElementById('votesA').textContent = data.votes.A;
-            document.getElementById('votesB').textContent = data.votes.B;
+            votesA.textContent = data.votes.A;
+            votesB.textContent = data.votes.B;
             const voteElement = document.createElement('p');
             voteElement.textContent = `${data.username} voted ${data.choice}`;
-            document.getElementById('recentVotes').prepend(voteElement);
+            recentVotes.prepend(voteElement);
         });
+
+        function updateGameState() {
+            fetch('/api/game-state')
+                .then(response => response.json())
+                .then(data => {
+                    gameArea.style.display = 'block';
+                    questionElement.textContent = data.currentQuestion.question;
+                    optionA.textContent = data.currentQuestion.options[0];
+                    optionB.textContent = data.currentQuestion.options[1];
+                    votesA.textContent = data.votes.A;
+                    votesB.textContent = data.votes.B;
+                })
+                .catch(error => console.error('Error updating game state:', error));
+        }
     </script>
 </body>
 </html>

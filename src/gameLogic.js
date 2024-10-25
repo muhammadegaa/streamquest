@@ -9,6 +9,7 @@ const questions = [
 let currentQuestionIndex = 0;
 let votes = { A: 0, B: 0 };
 let eventListeners = [];
+const { setupTwitchChat } = require('./twitchChat');
 
 function startGame() {
   currentQuestionIndex = 0;
@@ -20,7 +21,7 @@ function handlePlayerAction(action, choice, username) {
   if (action === 'vote') {
     votes[choice.toUpperCase()]++;
     notifyListeners('voteUpdated', { votes, username, choice });
-
+    io.emit('gameStarted', { question: questions[currentQuestionIndex].question });
     if (votes.A + votes.B >= 5) {
       currentQuestionIndex++;
       if (currentQuestionIndex < questions.length) {
@@ -31,6 +32,12 @@ function handlePlayerAction(action, choice, username) {
       }
     }
   }
+}
+
+function handleVote(choice, username) {
+  votes[choice.toUpperCase()]++;
+  notifyListeners('voteUpdated', { votes, username, choice });
+  io.emit('voteUpdated', { votes, username, choice });
 }
 
 function notifyListeners(event, data) {
@@ -46,7 +53,7 @@ function removeEventListeners(listener) {
 }
 
 function getCurrentQuestion() {
-  return questions[currentQuestionIndex].question;
+  return questions[currentQuestionIndex];
 }
 
 function getVotes() {
@@ -56,8 +63,8 @@ function getVotes() {
 module.exports = {
   startGame,
   handlePlayerAction,
-  addEventListeners,
-  removeEventListeners,
   getCurrentQuestion,
-  getVotes
+  getVotes,
+  addEventListeners,
+  removeEventListeners
 };
