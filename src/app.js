@@ -10,7 +10,21 @@ const cors = require('cors');
 const twitchEventSub = require('./twitchEventSub');
 
 const app = express();
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
+const socketServer = new Server(httpServer, {
+  cors: {
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ['websocket', 'polling'],
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  allowEIO3: true,
+  path: '/socket.io'
+});
+
+socketServer.attach(httpServer);
 
 console.log('Server starting...');
 
@@ -55,17 +69,19 @@ app.get('/auth/twitch/callback', async (req, res) => {
     res.redirect('/?login=success');
   } catch (error) {
     console.error('Error during Twitch authentication:', error);
+    console.error('Error details:', error.response ? error.response.data : 'No response data');
     res.status(500).send('Authentication failed');
   }
 });
 
 // WebSocket connection for real-time game events
-const io = new Server(server, {
+const io = new Server(httpServer, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    methods: ["GET", "POST"],
+    credentials: true
   },
-  transports: ['polling', 'websocket'],
+  transports: ['websocket', 'polling'],
   pingTimeout: 60000,
   pingInterval: 25000,
   allowEIO3: true,
@@ -86,6 +102,12 @@ io.on('connection', (socket) => {
   // Tambahkan event listener baru
   socket.on('connect_error', (error) => {
     console.error('Connection error:', error);
+    // Tambahkan logika penanganan kesalahan di sini
+  });
+
+  socket.on('connect_timeout', (timeout) => {
+    console.error('Connection timeout:', timeout);
+    // Tambahkan logika penanganan timeout di sini
   });
 });
 
@@ -125,7 +147,7 @@ app.get('/api/test', (req, res) => {
 
 // Start the server
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
@@ -135,6 +157,6 @@ app.use('/socket.io', express.static(path.join(__dirname, '../node_modules/socke
 twitchEventSub.setup(app);
 
 // Tambahkan logging untuk server
-server.on('error', (error) => {
+httpServer.on('error', (error) => {
   console.error('Server error:', error);
 });

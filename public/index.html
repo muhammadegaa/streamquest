@@ -22,38 +22,34 @@
     </div>
     <div id="recentVotes"></div>
     <script>
-        const socket = io('https://streamquest.vercel.app', {
-            transports: ['polling', 'websocket'],
-            forceNew: true,
-            reconnection: true,
-            reconnectionAttempts: Infinity,
+        const socket = io({
+            transports: ['websocket', 'polling'],
+            reconnectionAttempts: 5,
             reconnectionDelay: 1000,
-            reconnectionDelayMax: 5000,
-            randomizationFactor: 0.5,
             timeout: 20000,
-            autoConnect: false,
-            path: '/socket.io'
         });
 
         socket.on('connect_error', (error) => {
             console.error('Connection error:', error);
-            // Tambahkan logika penanganan kesalahan di sini
+            // Add error handling logic here
         });
 
         socket.on('connect_timeout', (timeout) => {
             console.error('Connection timeout:', timeout);
-            // Tambahkan logika penanganan timeout di sini
+            // Add timeout handling logic here
         });
 
-        socket.connect();
+        socket.on('reconnect_attempt', (attemptNumber) => {
+            console.log('Attempting reconnection:', attemptNumber);
+        });
 
-        const startButton = document.getElementById('startGame');
-        const gameArea = document.getElementById('gameArea');
-        const questionElement = document.getElementById('question');
-        const optionA = document.getElementById('optionA');
-        const optionB = document.getElementById('optionB');
+        socket.on('reconnect_error', (error) => {
+            console.error('Reconnection error:', error);
+        });
 
-        console.log('Script loaded');
+        socket.on('reconnect_failed', () => {
+            console.error('Failed to reconnect');
+        });
 
         socket.on('connect', () => {
             console.log('Socket connected:', socket.id);
@@ -68,14 +64,6 @@
             if (reason === 'io server disconnect') {
                 socket.connect();
             }
-        });
-
-        socket.on('reconnect', (attemptNumber) => {
-            console.log('Reconnected after', attemptNumber, 'attempts');
-        });
-
-        socket.on('reconnect_attempt', (attemptNumber) => {
-            console.log('Attempting reconnection:', attemptNumber);
         });
 
         startButton.addEventListener('click', () => {
