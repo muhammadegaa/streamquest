@@ -96,5 +96,9 @@ try {
   module.exports = app;
 } catch (error) {
   console.error('Unexpected error in app.js:', error);
-  throw error;
+  const app = express();
+  app.use((req, res) => {
+    res.status(500).send('Internal Server Error. Please try again later.');
+  });
+  module.exports = app;
 }
