@@ -2,8 +2,8 @@
 
 let questions = [];
 
-function addQuestion(question, options) {
-    questions.push({ question, options });
+function addQuestion(question, options, rightAnswer = '') {
+    questions.push({ question, options, rightAnswer });
 }
 
 let currentQuestionIndex = 0;

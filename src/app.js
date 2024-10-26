@@ -104,12 +104,22 @@ try {
   });
 
   app.post('/api/add-question', (req, res) => {
-    const { question, options } = req.body;
+    const { question, options, rightAnswer } = req.body;
     if (!question || !options || options.length !== 2) {
       return res.status(400).json({ message: 'Invalid question format' });
     }
-    gameLogic.addQuestion(question, options);
+    gameLogic.addQuestion(question, options, rightAnswer);
     res.json({ message: 'Question added successfully' });
+  });
+
+  app.post('/api/import-csv', express.text(), (req, res) => {
+    const csvData = req.body;
+    const questions = csvData.split('\n').map(row => {
+      const [question, rightAnswer] = row.split(',');
+      return { question, options: ['Yes', 'No'], rightAnswer };
+    });
+    questions.forEach(q => gameLogic.addQuestion(q.question, q.options, q.rightAnswer));
+    res.json({ message: 'CSV imported successfully' });
   });
 
   setInterval(() => {

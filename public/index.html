@@ -67,7 +67,10 @@
         <input type="text" id="newQuestion" placeholder="Enter your question">
         <input type="text" id="optionAInput" placeholder="Option A">
         <input type="text" id="optionBInput" placeholder="Option B">
+        <input type="text" id="rightAnswer" placeholder="Right answer (optional)">
         <button id="addQuestionBtn">Add Question</button>
+        <input type="file" id="csvFileInput" accept=".csv">
+        <button id="importCsvBtn">Import CSV</button>
     </div>
     <script>
         const startButton = document.getElementById('startGame');
@@ -237,17 +240,17 @@
         });
 
         addQuestionBtn.addEventListener('click', (event) => {
-            console.log('Add Question form submitted');
             event.preventDefault();
             const question = newQuestionInput.value;
             const optionA = optionAInput.value;
             const optionB = optionBInput.value;
+            const rightAnswer = document.getElementById('rightAnswer').value;
 
             if (question && optionA && optionB) {
                 fetch('/api/add-question', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question, options: [optionA, optionB] })
+                    body: JSON.stringify({ question, options: [optionA, optionB], rightAnswer })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -255,6 +258,7 @@
                     newQuestionInput.value = '';
                     optionAInput.value = '';
                     optionBInput.value = '';
+                    document.getElementById('rightAnswer').value = '';
                     questionForm.style.display = 'none';
                     alert('Question added successfully!');
                 })
@@ -263,7 +267,36 @@
                     alert('Failed to add question. Please try again.');
                 });
             } else {
-                alert('Please fill in all fields.');
+                alert('Please fill in all required fields.');
+            }
+        });
+
+        document.getElementById('importCsvBtn').addEventListener('click', () => {
+            const fileInput = document.getElementById('csvFileInput');
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const csv = e.target.result;
+                    fetch('/api/import-csv', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/csv' },
+                        body: csv
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data.message);
+                        fileInput.value = '';
+                        alert('CSV imported successfully!');
+                    })
+                    .catch(error => {
+                        console.error('Error importing CSV:', error);
+                        alert('Failed to import CSV. Please try again.');
+                    });
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Please select a CSV file to import.');
             }
         });
 
