@@ -50,7 +50,7 @@
     <h1>Stream Quest</h1>
     <button id="startGame">Start Game</button>
     <button id="twitchButton">Login with Twitch</button>
-    <button id="addQuestionButton" style="display: none;">Add Question</button>
+    <button id="addQuestionButton">Add Question</button>
     <div id="gameArea" style="display: none;">
         <h2>Current Question:</h2>
         <p id="question"></p>
@@ -231,7 +231,13 @@
             questionForm.style.display = 'block';
         }
 
+        document.getElementById('addQuestionButton').addEventListener('click', () => {
+            console.log('Add Question button clicked');
+            questionForm.style.display = 'block';
+        });
+
         addQuestionBtn.addEventListener('click', (event) => {
+            console.log('Add Question form submitted');
             event.preventDefault();
             const question = newQuestionInput.value;
             const optionA = optionAInput.value;
