@@ -22,19 +22,30 @@ function startGame() {
 }
 
 function handlePlayerAction(action, choice, username) {
-  if (action === 'vote') {
-    votes[choice.toUpperCase()]++;
-    notifyListeners('voteUpdated', { votes, username, choice });
-    if (votes.A + votes.B >= 3) {  // Changed from 5 to 3 for quicker progression
-      currentQuestionIndex++;
-      if (currentQuestionIndex < questions.length) {
-        votes = { A: 0, B: 0 };
-        notifyListeners('gameStateUpdated', { question: questions[currentQuestionIndex].question, options: questions[currentQuestionIndex].options });
-      } else {
-        notifyListeners('gameEnded', { message: "Quest completed!" });
-      }
+    if (action === 'vote') {
+        votes[choice.toUpperCase()]++;
+        notifyListeners('voteUpdated', { 
+            votes, 
+            username, 
+            choice,
+            question: questions[currentQuestionIndex].question,
+            options: questions[currentQuestionIndex].options
+        });
+
+        if (votes.A + votes.B >= 3) {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                votes = { A: 0, B: 0 };
+                notifyListeners('gameStateUpdated', {
+                    question: questions[currentQuestionIndex].question,
+                    options: questions[currentQuestionIndex].options,
+                    votes: votes
+                });
+            } else {
+                notifyListeners('gameEnded', { message: "Quest completed!" });
+            }
+        }
     }
-  }
 }
 
 function handleVote(choice, username) {

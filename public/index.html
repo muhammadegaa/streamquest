@@ -109,20 +109,30 @@
         updateLoginState();
 
         startButton.addEventListener('click', () => {
-            fetch('/api/start-game', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateGameState(data.gameState);
-                        startButton.disabled = true;
-                    } else {
-                        throw new Error('Failed to start game: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error starting game:', error);
-                    alert('Failed to start game. Please try again.');
-                });
+            console.log('Start button clicked');
+            fetch('/api/start-game', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server response:', data);
+                if (data.success) {
+                    gameArea.style.display = 'block';
+                    questionElement.textContent = data.gameState.question;
+                    optionA.textContent = data.gameState.options[0];
+                    optionB.textContent = data.gameState.options[1];
+                    votesA.textContent = '0';
+                    votesB.textContent = '0';
+                    startButton.disabled = true;
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start game. Please try again.');
+            });
         });
 
         optionA.addEventListener('click', () => sendPlayerAction('vote', 'A'));
@@ -153,46 +163,16 @@
 
         const eventSource = new EventSource('/api/events');
 
-        eventSource.onopen = (event) => {
-            console.log('EventSource connection opened:', event);
+        eventSource.onmessage = (event) => {
+            console.log('Event received:', event.data);
+            const data = JSON.parse(event.data);
+            updateGameState(data);
         };
 
         eventSource.onerror = (error) => {
             console.error('EventSource error:', error);
+            eventSource.close();
         };
-
-        eventSource.addEventListener('gameStarted', (event) => {
-            const data = JSON.parse(event.data);
-            updateGameState(data);
-        });
-
-        eventSource.addEventListener('gameStateUpdated', (event) => {
-            const data = JSON.parse(event.data);
-            updateGameState({
-                currentQuestion: {
-                    question: data.question,
-                    options: data.options
-                },
-                votes: data.votes
-            });
-        });
-
-        eventSource.addEventListener('voteUpdated', (event) => {
-            console.log('Received voteUpdated event:', event);
-            const data = JSON.parse(event.data);
-            console.log('Parsed data:', data);
-            votesA.textContent = data.votes.A;
-            votesB.textContent = data.votes.B;
-            const voteElement = document.createElement('p');
-            voteElement.textContent = `${data.username} voted ${data.choice}`;
-            recentVotes.prepend(voteElement);
-        });
-
-        eventSource.addEventListener('gameEnded', (event) => {
-            const data = JSON.parse(event.data);
-            alert(data.message);
-            gameArea.style.display = 'none';
-        });
 
         function updateGameState(data) {
             if (data && data.question && data.options) {
