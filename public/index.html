@@ -140,13 +140,17 @@
                 console.error('User must be logged in to perform actions');
                 return;
             }
+            console.log(`Sending player action: ${action}, choice: ${choice}, username: ${username}`);
             fetch('/api/player-action', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action, choice, username })
             })
                 .then(response => response.json())
-                .then(data => console.log(data))
+                .then(data => {
+                    console.log('Server response:', data);
+                    // Tambahkan kode di sini untuk memperbarui UI jika diperlukan
+                })
                 .catch(error => console.error('Error sending player action:', error));
         }
 
@@ -181,7 +185,9 @@
         });
 
         eventSource.addEventListener('voteUpdated', (event) => {
+            console.log('Received voteUpdated event:', event);
             const data = JSON.parse(event.data);
+            console.log('Parsed data:', data);
             votesA.textContent = data.votes.A;
             votesB.textContent = data.votes.B;
             const voteElement = document.createElement('p');

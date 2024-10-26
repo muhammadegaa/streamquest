@@ -69,8 +69,12 @@ try {
 
   app.post('/api/player-action', (req, res) => {
     const { action, choice, username } = req.body;
+    console.log(`Received action: ${action}, choice: ${choice}, username: ${username}`);
     gameLogic.handlePlayerAction(action, choice, username);
     res.json({ message: 'Action received' });
+    // Kirim event ke semua klien yang terhubung
+    const eventData = { event: 'voteUpdated', data: { votes: gameLogic.getVotes(), username, choice } };
+    res.write(`data: ${JSON.stringify(eventData)}\n\n`);
   });
 
   app.get('/api/events', (req, res) => {
