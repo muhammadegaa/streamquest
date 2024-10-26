@@ -301,9 +301,9 @@
         });
 
         // Show question form for streamers (you might want to add proper authentication here)
-        // if (isLoggedIn) {
-        //     showQuestionForm();
-        // }
+        if (isLoggedIn) {
+            showQuestionForm();
+        }
 
         document.getElementById('addQuestionButton').addEventListener('click', () => {
             questionForm.style.display = 'block';
