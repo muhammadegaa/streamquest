@@ -15,7 +15,8 @@ function startGame() {
   votes = { A: 0, B: 0 };
   return {
     question: questions[currentQuestionIndex].question,
-    options: questions[currentQuestionIndex].options
+    options: questions[currentQuestionIndex].options,
+    votes: votes
   };
 }
 

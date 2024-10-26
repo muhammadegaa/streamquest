@@ -117,18 +117,17 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log(data);
+                    console.log('Game started:', data);
                     if (data.success) {
-                        return fetch('/api/game-state');
+                        updateGameState(data.gameState);
                     } else {
                         throw new Error('Failed to start game: ' + data.message);
                     }
                 })
-                .then(response => response.json())
-                .then(gameState => {
-                    updateGameState(gameState);
-                })
-                .catch(error => console.error('Error starting game:', error));
+                .catch(error => {
+                    console.error('Error starting game:', error);
+                    alert('Failed to start game. Please try again.');
+                });
         });
 
         optionA.addEventListener('click', () => sendPlayerAction('vote', 'A'));
@@ -201,11 +200,11 @@
         });
 
         function updateGameState(data) {
-            if (data && data.currentQuestion) {
+            if (data && data.question && data.options) {
                 gameArea.style.display = 'block';
-                questionElement.textContent = data.currentQuestion.question;
-                optionA.textContent = data.currentQuestion.options[0];
-                optionB.textContent = data.currentQuestion.options[1];
+                questionElement.textContent = data.question;
+                optionA.textContent = data.options[0];
+                optionB.textContent = data.options[1];
                 votesA.textContent = data.votes ? data.votes.A : 0;
                 votesB.textContent = data.votes ? data.votes.B : 0;
             } else {

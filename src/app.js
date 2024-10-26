@@ -60,6 +60,7 @@ try {
   app.post('/api/start-game', (req, res) => {
     try {
       const gameState = gameLogic.startGame();
+      console.log('Game started, initial state:', gameState);
       res.json({ message: 'Game started', success: true, gameState });
     } catch (error) {
       console.error('Error starting game:', error);
