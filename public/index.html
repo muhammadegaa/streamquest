@@ -25,216 +25,33 @@
             cursor: pointer;
             font-size: 16px;
         }
-        #gameArea {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        #votes {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-        }
-        #recentVotes {
-            margin-top: 20px;
-            height: 100px;
-            overflow-y: auto;
-            background-color: white;
-            padding: 10px;
-            border-radius: 5px;
-        }
     </style>
 </head>
 <body>
     <h1>Stream Quest</h1>
-    <button id="startGame">Start Game</button>
     <button id="twitchButton">Login with Twitch</button>
-    <div id="gameArea" style="display: none;">
-        <h2>Current Question:</h2>
-        <p id="question"></p>
-        <button id="optionA">Option A</button>
-        <button id="optionB">Option B</button>
-    </div>
-    <div id="votes">
-        <p>Votes A: <span id="votesA">0</span></p>
-        <p>Votes B: <span id="votesB">0</span></p>
-    </div>
     <div id="recentVotes"></div>
     <script>
-        const startButton = document.getElementById('startGame');
-        const gameArea = document.getElementById('gameArea');
-        const questionElement = document.getElementById('question');
-        const optionA = document.getElementById('optionA');
-        const optionB = document.getElementById('optionB');
-        const votesA = document.getElementById('votesA');
-        const votesB = document.getElementById('votesB');
-        const recentVotes = document.getElementById('recentVotes');
         const twitchButton = document.getElementById('twitchButton');
         let isLoggedIn = false;
         let username = '';
         let role = '';
 
-        // Check if user is logged in
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('login') === 'success') {
-            isLoggedIn = true;
-            username = urlParams.get('username') || '';
-            const role = urlParams.get('role') || '';
-            updateLoginState(role);
-        }
-
-        function updateLoginState(role) {
-            if (isLoggedIn) {
-                twitchButton.textContent = `Logged in as ${username}`;
-                twitchButton.disabled = true;
-                startButton.disabled = false;
-                if (role === 'streamer') {
-                    document.getElementById('addQuestionButton').style.display = 'inline-block';
-                }
-            } else {
-                twitchButton.textContent = 'Login with Twitch';
-                twitchButton.disabled = false;
-                startButton.disabled = true;
-                document.getElementById('addQuestionButton').style.display = 'none';
+        function updateLoginState() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('login') === 'success') {
+                isLoggedIn = true;
+                username = urlParams.get('username');
+                role = urlParams.get('role');
+                twitchButton.style.display = 'none';
             }
         }
 
         twitchButton.addEventListener('click', () => {
-            if (!isLoggedIn) {
-                window.location.href = '/auth/twitch';
-            }
-        });
-
-        updateLoginState();
-
-        startButton.addEventListener('click', () => {
-            console.log('Start button clicked');
-            fetch('/api/start-game', { 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Server response:', data);
-                if (data.success) {
-                    gameArea.style.display = 'block';
-                    questionElement.textContent = data.gameState.question;
-                    optionA.textContent = data.gameState.options[0];
-                    optionB.textContent = data.gameState.options[1];
-                    votesA.textContent = '0';
-                    votesB.textContent = '0';
-                    startButton.disabled = true;
-                } else {
-                    throw new Error(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to start game. Please try again.');
-            });
-        });
-
-        optionA.addEventListener('click', () => sendPlayerAction('vote', 'A'));
-        optionB.addEventListener('click', () => sendPlayerAction('vote', 'B'));
-
-        function sendPlayerAction(action, choice) {
-            if (!isLoggedIn) {
-                console.error('User must be logged in to perform actions');
-                return;
-            }
-            console.log(`Sending player action: ${action}, choice: ${choice}, username: ${username}`);
-            fetch('/api/player-action', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, choice, username })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Server response:', data);
-                    // Tambahkan kode di sini untuk memperbarui UI jika diperlukan
-                })
-                .catch(error => console.error('Error sending player action:', error));
-        }
-
-        document.getElementById('twitchLogin').addEventListener('click', () => {
             window.location.href = '/auth/twitch';
         });
 
-        const eventSource = new EventSource('/api/events');
-
-        eventSource.onmessage = (event) => {
-            console.log('Event received:', event.data);
-            const data = JSON.parse(event.data);
-            updateGameState(data);
-        };
-
-        eventSource.onerror = (error) => {
-            console.error('EventSource error:', error);
-            eventSource.close();
-        };
-
-        function updateGameState(data) {
-            if (data && data.question && data.options) {
-                gameArea.style.display = 'block';
-                questionElement.textContent = data.question;
-                optionA.textContent = data.options[0];
-                optionB.textContent = data.options[1];
-                votesA.textContent = data.votes.A;
-                votesB.textContent = data.votes.B;
-            } else {
-                console.error('Invalid game state data:', data);
-            }
-        }
-
-        const questionForm = document.getElementById('questionForm');
-        const newQuestionInput = document.getElementById('newQuestion');
-        const optionAInput = document.getElementById('optionAInput');
-        const optionBInput = document.getElementById('optionBInput');
-        const addQuestionBtn = document.getElementById('addQuestionBtn');
-
-        function showQuestionForm() {
-            questionForm.style.display = 'block';
-        }
-
-        document.getElementById('addQuestionButton').addEventListener('click', () => {
-            console.log('Add Question button clicked');
-            document.getElementById('questionForm').style.display = 'block';
-        });
-
-        document.getElementById('importCsvBtn').addEventListener('click', () => {
-            const fileInput = document.getElementById('csvFileInput');
-            const file = fileInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const csv = e.target.result;
-                    fetch('/api/import-csv', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/csv' },
-                        body: csv
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(data.message);
-                        fileInput.value = '';
-                        alert('CSV imported successfully!');
-                    })
-                    .catch(error => {
-                        console.error('Error importing CSV:', error);
-                        alert('Failed to import CSV. Please try again.');
-                    });
-                };
-                reader.readAsText(file);
-            } else {
-                alert('Please select a CSV file to import.');
-            }
-        });
-
-        // Show question form for streamers (you might want to add proper authentication here)
-        if (isLoggedIn) {
-            showQuestionForm();
-        }
+        updateLoginState();
     </script>
 </body>
 </html>

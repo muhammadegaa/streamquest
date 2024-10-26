@@ -50,44 +50,6 @@ try {
     }
   });
 
-  app.get('/api/game-state', (req, res) => {
-    res.json({
-      currentQuestion: gameLogic.getCurrentQuestion(),
-      votes: gameLogic.getVotes()
-    });
-  });
-
-  app.post('/api/start-game', (req, res) => {
-    try {
-      const gameState = gameLogic.startGame();
-      console.log('Game started, initial state:', gameState);
-      res.json({ 
-        success: true, 
-        gameState: {
-          question: gameState.question,
-          options: gameState.options,
-          votes: gameState.votes
-        }
-      });
-    } catch (error) {
-      console.error('Error starting game:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'Failed to start game: ' + error.message 
-      });
-    }
-  });
-
-  app.post('/api/player-action', (req, res) => {
-    const { action, choice, username } = req.body;
-    console.log(`Received action: ${action}, choice: ${choice}, username: ${username}`);
-    gameLogic.handlePlayerAction(action, choice, username);
-    res.json({ message: 'Action received' });
-    // Kirim event ke semua klien yang terhubung
-    const eventData = { event: 'voteUpdated', data: { votes: gameLogic.getVotes(), username, choice } };
-    res.write(`data: ${JSON.stringify(eventData)}\n\n`);
-  });
-
   app.get('/api/events', (req, res) => {
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
