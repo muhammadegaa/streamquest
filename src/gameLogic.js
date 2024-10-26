@@ -64,7 +64,7 @@ function generateQuestion() {
     const topics = ['gameplay', 'stream', 'chat', 'emotes'];
     const topic = topics[Math.floor(Math.random() * topics.length)];
     const question = `What do you think about the current ${topic}?`;
-    const options = ['It's great!', 'It could be better'];
+    const options = ["It's great!", "It could be better"];
     addQuestion(question, options);
 }
 

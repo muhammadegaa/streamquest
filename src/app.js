@@ -1,6 +1,7 @@
 // src/app.js
+const express = require('express');
+
 try {
-  const express = require('express');
   const http = require('http');
   require('dotenv').config();
   const gameLogic = require('./gameLogic');
