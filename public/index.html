@@ -236,14 +236,15 @@
 
         document.getElementById('addQuestionButton').addEventListener('click', () => {
             console.log('Add Question button clicked');
-            questionForm.style.display = 'block';
+            document.getElementById('questionForm').style.display = 'block';
         });
 
         addQuestionBtn.addEventListener('click', (event) => {
             event.preventDefault();
-            const question = newQuestionInput.value;
-            const optionA = optionAInput.value;
-            const optionB = optionBInput.value;
+            console.log('Add Question form submitted');
+            const question = document.getElementById('newQuestion').value;
+            const optionA = document.getElementById('optionAInput').value;
+            const optionB = document.getElementById('optionBInput').value;
             const rightAnswer = document.getElementById('rightAnswer').value;
 
             if (question && optionA && optionB) {
@@ -255,11 +256,11 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data.message);
-                    newQuestionInput.value = '';
-                    optionAInput.value = '';
-                    optionBInput.value = '';
+                    document.getElementById('newQuestion').value = '';
+                    document.getElementById('optionAInput').value = '';
+                    document.getElementById('optionBInput').value = '';
                     document.getElementById('rightAnswer').value = '';
-                    questionForm.style.display = 'none';
+                    document.getElementById('questionForm').style.display = 'none';
                     alert('Question added successfully!');
                 })
                 .catch(error => {
