@@ -61,6 +61,13 @@
         <p>Votes B: <span id="votesB">0</span></p>
     </div>
     <div id="recentVotes"></div>
+    <div id="questionForm" style="display: none;">
+        <h2>Add a New Question</h2>
+        <input type="text" id="newQuestion" placeholder="Enter your question">
+        <input type="text" id="optionAInput" placeholder="Option A">
+        <input type="text" id="optionBInput" placeholder="Option B">
+        <button id="addQuestionBtn">Add Question</button>
+    </div>
     <script>
         const startButton = document.getElementById('startGame');
         const gameArea = document.getElementById('gameArea');
@@ -185,6 +192,43 @@
                     })
                     .catch(error => console.error('Error updating game state:', error));
             }
+        }
+
+        const questionForm = document.getElementById('questionForm');
+        const newQuestionInput = document.getElementById('newQuestion');
+        const optionAInput = document.getElementById('optionAInput');
+        const optionBInput = document.getElementById('optionBInput');
+        const addQuestionBtn = document.getElementById('addQuestionBtn');
+
+        function showQuestionForm() {
+            questionForm.style.display = 'block';
+        }
+
+        addQuestionBtn.addEventListener('click', () => {
+            const question = newQuestionInput.value;
+            const optionA = optionAInput.value;
+            const optionB = optionBInput.value;
+
+            if (question && optionA && optionB) {
+                fetch('/api/add-question', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question, options: [optionA, optionB] })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                    newQuestionInput.value = '';
+                    optionAInput.value = '';
+                    optionBInput.value = '';
+                })
+                .catch(error => console.error('Error adding question:', error));
+            }
+        });
+
+        // Show question form for streamers (you might want to add proper authentication here)
+        if (isLoggedIn) {
+            showQuestionForm();
         }
     </script>
 </body>

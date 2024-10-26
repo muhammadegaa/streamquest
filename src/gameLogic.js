@@ -1,10 +1,10 @@
 // src/gameLogic.js
 
-const questions = [
-    { question: "Apakah karakter harus pergi ke gua atau hutan?", options: ["Gua", "Hutan"] },
-    { question: "Haruskah karakter berbicara dengan penduduk desa atau melanjutkan perjalanan?", options: ["Berbicara", "Melanjutkan"] },
-    { question: "Apakah karakter harus mengambil pedang ajaib atau tongkat sihir?", options: ["Pedang", "Tongkat"] }
-];
+let questions = [];
+
+function addQuestion(question, options) {
+    questions.push({ question, options });
+}
 
 let currentQuestionIndex = 0;
 let votes = { A: 0, B: 0 };
@@ -59,11 +59,21 @@ function getVotes() {
   return votes;
 }
 
+function generateQuestion() {
+    // This is a simple example. You might want to make this more sophisticated.
+    const topics = ['gameplay', 'stream', 'chat', 'emotes'];
+    const topic = topics[Math.floor(Math.random() * topics.length)];
+    const question = `What do you think about the current ${topic}?`;
+    const options = ['It's great!', 'It could be better'];
+    addQuestion(question, options);
+}
+
 module.exports = {
   startGame,
   handlePlayerAction,
   getCurrentQuestion,
   getVotes,
   addEventListeners,
-  removeEventListeners
+  removeEventListeners,
+  generateQuestion
 };

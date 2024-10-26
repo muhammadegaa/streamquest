@@ -93,6 +93,19 @@ try {
     });
   });
 
+  app.post('/api/add-question', (req, res) => {
+    const { question, options } = req.body;
+    if (!question || !options || options.length !== 2) {
+      return res.status(400).json({ message: 'Invalid question format' });
+    }
+    gameLogic.addQuestion(question, options);
+    res.json({ message: 'Question added successfully' });
+  });
+
+  setInterval(() => {
+    gameLogic.generateQuestion();
+  }, 300000); // Generate a new question every 5 minutes
+
   module.exports = app;
 } catch (error) {
   console.error('Unexpected error in app.js:', error);
