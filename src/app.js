@@ -59,8 +59,8 @@ try {
 
   app.post('/api/start-game', (req, res) => {
     try {
-      gameLogic.startGame();
-      res.json({ message: 'Game started', success: true });
+      const gameState = gameLogic.startGame();
+      res.json({ message: 'Game started', success: true, gameState });
     } catch (error) {
       console.error('Error starting game:', error);
       res.status(500).json({ message: 'Failed to start game', error: error.message });

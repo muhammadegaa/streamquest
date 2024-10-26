@@ -17,10 +17,10 @@ function startGame() {
   }
   currentQuestionIndex = 0;
   votes = { A: 0, B: 0 };
-  notifyListeners('gameStarted', { 
+  return {
     question: questions[currentQuestionIndex].question,
     options: questions[currentQuestionIndex].options
-  });
+  };
 }
 
 function handlePlayerAction(action, choice, username) {

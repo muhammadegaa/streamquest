@@ -248,7 +248,7 @@
                     newQuestionInput.value = '';
                     optionAInput.value = '';
                     optionBInput.value = '';
-                    document.getElementById('questionForm').style.display = 'none';
+                    questionForm.style.display = 'none';
                 })
                 .catch(error => console.error('Error adding question:', error));
             }
@@ -260,7 +260,7 @@
         // }
 
         document.getElementById('addQuestionButton').addEventListener('click', () => {
-            document.getElementById('questionForm').style.display = 'block';
+            questionForm.style.display = 'block';
         });
     </script>
 </body>
