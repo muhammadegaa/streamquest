@@ -146,12 +146,12 @@
 
         eventSource.addEventListener('gameStarted', (event) => {
             const data = JSON.parse(event.data);
-            updateGameState();
+            updateGameState(data);
         });
 
         eventSource.addEventListener('gameStateUpdated', (event) => {
             const data = JSON.parse(event.data);
-            updateGameState();
+            updateGameState(data);
         });
 
         eventSource.addEventListener('voteUpdated', (event) => {
@@ -163,18 +163,28 @@
             recentVotes.prepend(voteElement);
         });
 
-        function updateGameState() {
-            fetch('/api/game-state')
-                .then(response => response.json())
-                .then(data => {
-                    gameArea.style.display = 'block';
-                    questionElement.textContent = data.currentQuestion.question;
-                    optionA.textContent = data.currentQuestion.options[0];
-                    optionB.textContent = data.currentQuestion.options[1];
-                    votesA.textContent = data.votes.A;
-                    votesB.textContent = data.votes.B;
-                })
-                .catch(error => console.error('Error updating game state:', error));
+        eventSource.addEventListener('gameEnded', (event) => {
+            const data = JSON.parse(event.data);
+            alert(data.message);
+            gameArea.style.display = 'none';
+        });
+
+        function updateGameState(data) {
+            if (data) {
+                gameArea.style.display = 'block';
+                questionElement.textContent = data.question;
+                optionA.textContent = data.options[0];
+                optionB.textContent = data.options[1];
+                votesA.textContent = data.votes ? data.votes.A : 0;
+                votesB.textContent = data.votes ? data.votes.B : 0;
+            } else {
+                fetch('/api/game-state')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateGameState(data);
+                    })
+                    .catch(error => console.error('Error updating game state:', error));
+            }
         }
     </script>
 </body>
