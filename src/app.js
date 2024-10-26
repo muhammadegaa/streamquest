@@ -43,7 +43,7 @@ try {
     try {
       const token = await getTwitchToken(code);
       const userInfo = await getTwitchUserInfo(token);
-      res.redirect(`/?login=success&username=${userInfo.login}`);
+      res.redirect(`/?login=success&username=${userInfo.login}&role=${userInfo.role}`);
     } catch (error) {
       console.error('Error during Twitch authentication:', error);
       res.status(500).send('Authentication failed');

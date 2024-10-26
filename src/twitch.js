@@ -32,7 +32,10 @@ async function getTwitchUserInfo(token) {
             'Client-Id': TWITCH_CLIENT_ID
         }
     });
-    return response.data.data[0];
+    const userData = response.data.data[0];
+    // Assume the channel owner (streamer) is the one logging in
+    userData.role = 'streamer';
+    return userData;
 }
 
 module.exports = { handleTwitchAuth, getTwitchToken, getTwitchUserInfo };

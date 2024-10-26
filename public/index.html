@@ -81,21 +81,25 @@
         const twitchButton = document.getElementById('twitchButton');
         let isLoggedIn = false;
         let username = '';
+        let role = '';
 
         // Check if user is logged in
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('login') === 'success') {
             isLoggedIn = true;
             username = urlParams.get('username') || '';
-            updateLoginState();
+            const role = urlParams.get('role') || '';
+            updateLoginState(role);
         }
 
-        function updateLoginState() {
+        function updateLoginState(role) {
             if (isLoggedIn) {
                 twitchButton.textContent = `Logged in as ${username}`;
                 twitchButton.disabled = true;
                 startButton.disabled = false;
-                document.getElementById('addQuestionButton').style.display = 'inline-block';
+                if (role === 'streamer') {
+                    document.getElementById('addQuestionButton').style.display = 'inline-block';
+                }
             } else {
                 twitchButton.textContent = 'Login with Twitch';
                 twitchButton.disabled = false;
@@ -244,6 +248,7 @@
                     newQuestionInput.value = '';
                     optionAInput.value = '';
                     optionBInput.value = '';
+                    document.getElementById('questionForm').style.display = 'none';
                 })
                 .catch(error => console.error('Error adding question:', error));
             }

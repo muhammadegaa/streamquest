@@ -1,9 +1,6 @@
 // src/gameLogic.js
 
-let questions = [
-  { question: "What's your favorite game genre?", options: ["Action", "RPG"] },
-  { question: "Do you prefer single-player or multiplayer games?", options: ["Single-player", "Multiplayer"] }
-];
+let questions = [];
 
 function addQuestion(question, options) {
     questions.push({ question, options });
