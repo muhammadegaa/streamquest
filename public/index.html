@@ -231,7 +231,8 @@
             questionForm.style.display = 'block';
         }
 
-        addQuestionBtn.addEventListener('click', () => {
+        addQuestionBtn.addEventListener('click', (event) => {
+            event.preventDefault();
             const question = newQuestionInput.value;
             const optionA = optionAInput.value;
             const optionB = optionBInput.value;
@@ -249,8 +250,14 @@
                     optionAInput.value = '';
                     optionBInput.value = '';
                     questionForm.style.display = 'none';
+                    alert('Question added successfully!');
                 })
-                .catch(error => console.error('Error adding question:', error));
+                .catch(error => {
+                    console.error('Error adding question:', error);
+                    alert('Failed to add question. Please try again.');
+                });
+            } else {
+                alert('Please fill in all fields.');
             }
         });
 
