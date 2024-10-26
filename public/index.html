@@ -111,10 +111,19 @@
 
         startButton.addEventListener('click', () => {
             fetch('/api/start-game', { method: 'POST' })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     console.log(data);
-                    updateGameState();
+                    if (data.success) {
+                        updateGameState();
+                    } else {
+                        console.error('Failed to start game:', data.message);
+                    }
                 })
                 .catch(error => console.error('Error starting game:', error));
         });
@@ -177,7 +186,7 @@
         });
 
         function updateGameState(data) {
-            if (data) {
+            if (data && data.question) {
                 gameArea.style.display = 'block';
                 questionElement.textContent = data.question;
                 optionA.textContent = data.options[0];
@@ -186,9 +195,18 @@
                 votesB.textContent = data.votes ? data.votes.B : 0;
             } else {
                 fetch('/api/game-state')
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
-                        updateGameState(data);
+                        if (data.question) {
+                            updateGameState(data);
+                        } else {
+                            console.error('Invalid game state data:', data);
+                        }
                     })
                     .catch(error => console.error('Error updating game state:', error));
             }

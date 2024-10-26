@@ -1,6 +1,9 @@
 // src/gameLogic.js
 
-let questions = [];
+let questions = [
+  { question: "What's your favorite game genre?", options: ["Action", "RPG"] },
+  { question: "Do you prefer single-player or multiplayer games?", options: ["Single-player", "Multiplayer"] }
+];
 
 function addQuestion(question, options) {
     questions.push({ question, options });
@@ -12,9 +15,15 @@ let eventListeners = [];
 const { setupTwitchChat } = require('./twitchChat');
 
 function startGame() {
+  if (questions.length === 0) {
+    throw new Error("No questions available");
+  }
   currentQuestionIndex = 0;
   votes = { A: 0, B: 0 };
-  notifyListeners('gameStarted', { question: questions[currentQuestionIndex].question });
+  notifyListeners('gameStarted', { 
+    question: questions[currentQuestionIndex].question,
+    options: questions[currentQuestionIndex].options
+  });
 }
 
 function handlePlayerAction(action, choice, username) {

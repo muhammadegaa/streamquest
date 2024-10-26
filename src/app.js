@@ -58,8 +58,13 @@ try {
   });
 
   app.post('/api/start-game', (req, res) => {
-    gameLogic.startGame();
-    res.json({ message: 'Game started' });
+    try {
+      gameLogic.startGame();
+      res.json({ message: 'Game started', success: true });
+    } catch (error) {
+      console.error('Error starting game:', error);
+      res.status(500).json({ message: 'Failed to start game', error: error.message });
+    }
   });
 
   app.post('/api/player-action', (req, res) => {
