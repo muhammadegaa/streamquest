@@ -49,7 +49,7 @@
 <body>
     <h1>Stream Quest</h1>
     <button id="startGame">Start Game</button>
-    <button id="twitchLogin">Login with Twitch</button>
+    <button id="twitchButton">Login with Twitch</button>
     <div id="gameArea" style="display: none;">
         <h2>Current Question:</h2>
         <p id="question"></p>
@@ -70,6 +70,37 @@
         const votesA = document.getElementById('votesA');
         const votesB = document.getElementById('votesB');
         const recentVotes = document.getElementById('recentVotes');
+        const twitchButton = document.getElementById('twitchButton');
+        let isLoggedIn = false;
+        let username = '';
+
+        // Check if user is logged in
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('login') === 'success') {
+            isLoggedIn = true;
+            username = urlParams.get('username') || '';
+            updateLoginState();
+        }
+
+        function updateLoginState() {
+            if (isLoggedIn) {
+                twitchButton.textContent = `Logged in as ${username}`;
+                twitchButton.disabled = true;
+                startButton.disabled = false;
+            } else {
+                twitchButton.textContent = 'Login with Twitch';
+                twitchButton.disabled = false;
+                startButton.disabled = true;
+            }
+        }
+
+        twitchButton.addEventListener('click', () => {
+            if (!isLoggedIn) {
+                window.location.href = '/auth/twitch';
+            }
+        });
+
+        updateLoginState();
 
         startButton.addEventListener('click', () => {
             fetch('/api/start-game', { method: 'POST' })
@@ -85,7 +116,10 @@
         optionB.addEventListener('click', () => sendPlayerAction('vote', 'B'));
 
         function sendPlayerAction(action, choice) {
-            const username = new URLSearchParams(window.location.search).get('username') || 'Player';
+            if (!isLoggedIn) {
+                console.error('User must be logged in to perform actions');
+                return;
+            }
             fetch('/api/player-action', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
