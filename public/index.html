@@ -110,16 +110,11 @@
 
         startButton.addEventListener('click', () => {
             fetch('/api/start-game', { method: 'POST' })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Game started:', data);
                     if (data.success) {
                         updateGameState(data.gameState);
+                        startButton.disabled = true;
                     } else {
                         throw new Error('Failed to start game: ' + data.message);
                     }
@@ -205,8 +200,8 @@
                 questionElement.textContent = data.question;
                 optionA.textContent = data.options[0];
                 optionB.textContent = data.options[1];
-                votesA.textContent = data.votes ? data.votes.A : 0;
-                votesB.textContent = data.votes ? data.votes.B : 0;
+                votesA.textContent = data.votes.A;
+                votesB.textContent = data.votes.B;
             } else {
                 console.error('Invalid game state data:', data);
             }

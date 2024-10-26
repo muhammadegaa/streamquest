@@ -1,6 +1,10 @@
 // src/gameLogic.js
 
-let questions = [];
+let questions = [
+    { question: "Should the character go left or right?", options: ["Left", "Right"] },
+    { question: "Fight the dragon or negotiate?", options: ["Fight", "Negotiate"] },
+    { question: "Take the treasure or leave it?", options: ["Take", "Leave"] }
+];
 
 let currentQuestionIndex = 0;
 let votes = { A: 0, B: 0 };
@@ -8,9 +12,6 @@ let eventListeners = [];
 const { setupTwitchChat } = require('./twitchChat');
 
 function startGame() {
-  if (questions.length === 0) {
-    throw new Error("No questions available");
-  }
   currentQuestionIndex = 0;
   votes = { A: 0, B: 0 };
   return {

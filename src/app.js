@@ -61,10 +61,10 @@ try {
     try {
       const gameState = gameLogic.startGame();
       console.log('Game started, initial state:', gameState);
-      res.json({ message: 'Game started', success: true, gameState });
+      res.json({ success: true, gameState });
     } catch (error) {
       console.error('Error starting game:', error);
-      res.status(500).json({ message: 'Failed to start game', error: error.message });
+      res.status(500).json({ success: false, message: 'Failed to start game', error: error.message });
     }
   });
 
