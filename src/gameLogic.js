@@ -2,11 +2,6 @@
 
 let questions = [];
 
-function addQuestion(question, options, rightAnswer = '') {
-    questions.push({ question, options, rightAnswer });
-    console.log('Question added:', { question, options, rightAnswer });
-}
-
 let currentQuestionIndex = 0;
 let votes = { A: 0, B: 0 };
 let eventListeners = [];

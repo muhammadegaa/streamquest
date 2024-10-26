@@ -50,7 +50,6 @@
     <h1>Stream Quest</h1>
     <button id="startGame">Start Game</button>
     <button id="twitchButton">Login with Twitch</button>
-    <button id="addQuestionButton">Add Question</button>
     <div id="gameArea" style="display: none;">
         <h2>Current Question:</h2>
         <p id="question"></p>
@@ -62,14 +61,6 @@
         <p>Votes B: <span id="votesB">0</span></p>
     </div>
     <div id="recentVotes"></div>
-    <div id="questionForm" style="display: none;">
-        <h2>Add a New Question</h2>
-        <input type="text" id="newQuestion" placeholder="Enter your question">
-        <input type="text" id="optionAInput" placeholder="Option A">
-        <input type="text" id="optionBInput" placeholder="Option B">
-        <input type="text" id="rightAnswer" placeholder="Right answer (optional)">
-        <button id="addQuestionBtn">Add Question</button>
-    </div>
     <script>
         const startButton = document.getElementById('startGame');
         const gameArea = document.getElementById('gameArea');
@@ -237,39 +228,6 @@
             document.getElementById('questionForm').style.display = 'block';
         });
 
-        addQuestionBtn.addEventListener('click', (event) => {
-            event.preventDefault();
-            console.log('Add Question form submitted');
-            const question = document.getElementById('newQuestion').value;
-            const optionA = document.getElementById('optionAInput').value;
-            const optionB = document.getElementById('optionBInput').value;
-            const rightAnswer = document.getElementById('rightAnswer').value;
-
-            if (question && optionA && optionB) {
-                fetch('/api/add-question', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question, options: [optionA, optionB], rightAnswer })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data.message);
-                    document.getElementById('newQuestion').value = '';
-                    document.getElementById('optionAInput').value = '';
-                    document.getElementById('optionBInput').value = '';
-                    document.getElementById('rightAnswer').value = '';
-                    document.getElementById('questionForm').style.display = 'none';
-                    alert('Question added successfully!');
-                })
-                .catch(error => {
-                    console.error('Error adding question:', error);
-                    alert('Failed to add question. Please try again.');
-                });
-            } else {
-                alert('Please fill in all required fields.');
-            }
-        });
-
         document.getElementById('importCsvBtn').addEventListener('click', () => {
             const fileInput = document.getElementById('csvFileInput');
             const file = fileInput.files[0];
@@ -303,10 +261,6 @@
         if (isLoggedIn) {
             showQuestionForm();
         }
-
-        document.getElementById('addQuestionButton').addEventListener('click', () => {
-            questionForm.style.display = 'block';
-        });
     </script>
 </body>
 </html>
