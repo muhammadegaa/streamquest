@@ -50,6 +50,7 @@
     <h1>Stream Quest</h1>
     <button id="startGame">Start Game</button>
     <button id="twitchButton">Login with Twitch</button>
+    <button id="addQuestionButton" style="display: none;">Add Question</button>
     <div id="gameArea" style="display: none;">
         <h2>Current Question:</h2>
         <p id="question"></p>
@@ -94,10 +95,12 @@
                 twitchButton.textContent = `Logged in as ${username}`;
                 twitchButton.disabled = true;
                 startButton.disabled = false;
+                document.getElementById('addQuestionButton').style.display = 'inline-block';
             } else {
                 twitchButton.textContent = 'Login with Twitch';
                 twitchButton.disabled = false;
                 startButton.disabled = true;
+                document.getElementById('addQuestionButton').style.display = 'none';
             }
         }
 
@@ -247,9 +250,13 @@
         });
 
         // Show question form for streamers (you might want to add proper authentication here)
-        if (isLoggedIn) {
-            showQuestionForm();
-        }
+        // if (isLoggedIn) {
+        //     showQuestionForm();
+        // }
+
+        document.getElementById('addQuestionButton').addEventListener('click', () => {
+            document.getElementById('questionForm').style.display = 'block';
+        });
     </script>
 </body>
 </html>
