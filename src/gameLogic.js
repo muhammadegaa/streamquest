@@ -64,4 +64,25 @@ function getCurrentQuestion() {
   return questions[currentQuestionIndex];
 }
 
-functio
+function getVotes() {
+  return votes;
+}
+
+function generateQuestion() {
+    // This is a simple example. You might want to make this more sophisticated.
+    const topics = ['gameplay', 'stream', 'chat', 'emotes'];
+    const topic = topics[Math.floor(Math.random() * topics.length)];
+    const question = `What do you think about the current ${topic}?`;
+    const options = ["It's great!", "It could be better"];
+    addQuestion(question, options);
+}
+
+module.exports = {
+  startGame,
+  handlePlayerAction,
+  getCurrentQuestion,
+  getVotes,
+  addEventListeners,
+  removeEventListeners,
+  generateQuestion
+};
